@@ -567,7 +567,7 @@ int inv_icm20948_poll_sensor(struct inv_icm20948 * s, void * context,
 	uint64_t lastIrqTimeUs;
 
 	inv_icm20948_identify_interrupt(s, &int_read_back);
-
+	
 	if (int_read_back & (BIT_MSG_DMP_INT | BIT_MSG_DMP_INT_0)) {
 		lastIrqTimeUs = inv_icm20948_get_time_us();
 		do {

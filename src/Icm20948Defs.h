@@ -101,8 +101,14 @@ extern "C" {
 #define BIT_PWR_ALL_OFF                 0x7f
 
 #define REG_INT_PIN_CFG         (BANK_0 | 0x0F)
+#define BIT_INT_ACTL                    0x80
+#define BIT_INT_OPEN                    0x40
 #define BIT_INT_LATCH_EN                0x20
+#define BIT_INT_ANYRD_2CLEAR            0x10
+#define BIT_ACTL_FSYNC                  0x08
+#define BIT_FSYNC_INT_MODE_EN           0x04
 #define BIT_BYPASS_EN                   0x02
+                 
 
 #define REG_INT_ENABLE          (BANK_0 | 0x10)
 #define BIT_DMP_INT_EN                  0x02

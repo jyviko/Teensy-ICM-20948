@@ -1,7 +1,7 @@
 /*
 * ________________________________________________________________________________________________________
-* Copyright © 2014-2015 InvenSense Inc. Portions Copyright © 2014-2015 Movea. All rights reserved.
-* This software, related documentation and any modifications thereto (collectively “Software”) is subject
+* Copyright ï¿½ 2014-2015 InvenSense Inc. Portions Copyright ï¿½ 2014-2015 Movea. All rights reserved.
+* This software, related documentation and any modifications thereto (collectively ï¿½Softwareï¿½) is subject
 * to InvenSense and its licensors' intellectual property rights under U.S. and international copyright and
 * other intellectual property rights laws.
 * InvenSense and its licensors retain all intellectual property and proprietary rights in and to the Software
@@ -686,19 +686,18 @@ int inv_icm20948_set_serial_comm(struct inv_icm20948 * s, enum SMARTSENSOR_SERIA
 int inv_icm20948_set_int1_assertion(struct inv_icm20948 * s, int enable)
 {
 	int   result = 0;
-	// unsigned char reg_pin_cfg;
+	unsigned char reg_pin_cfg = 0;
 	unsigned char reg_int_enable;
 
 	// INT1 held until interrupt status is cleared
-	/*
-	result         |= inv_icm20948_read_mems_reg(s, REG_INT_PIN_CFG, 1, &reg_pin_cfg);
-	reg_pin_cfg    |= BIT_INT_LATCH_EN ;	// Latchen : BIT5 held the IT until register is read
+	
+	//result         |= inv_icm20948_read_mems_reg(s, REG_INT_PIN_CFG, 1, &reg_pin_cfg);
+	reg_pin_cfg    |= BIT_INT_ACTL| BIT_INT_OPEN;  //| Latchen : BIT5 held the IT until register is read
 	result         |= inv_icm20948_write_single_mems_reg(s, REG_INT_PIN_CFG, reg_pin_cfg);
-	*/
 
-	// Set int1 enable
+	// Set int1 enable 
 	result |= inv_icm20948_read_mems_reg(s, REG_INT_ENABLE, 1, &reg_int_enable);
-
+	
 	if(enable) { // Enable bit
 		reg_int_enable |= BIT_DMP_INT_EN;
 	}
@@ -708,7 +707,7 @@ int inv_icm20948_set_int1_assertion(struct inv_icm20948 * s, int enable)
 
 	result |= inv_icm20948_write_single_mems_reg(s, REG_INT_ENABLE, reg_int_enable);
 
-	return result;
+	return reg_pin_cfg;
 }
 
 
