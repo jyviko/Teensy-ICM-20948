@@ -6,6 +6,7 @@
 #include <SPI.h>
 
 // InvenSense drivers and utils
+#include "../../../../../src/DebugUtils.h"
 #include "Icm20948.h"
 #include "SensorTypes.h"
 #include "Icm20948MPUFifoControl.h"
@@ -102,20 +103,20 @@ static const uint8_t dmp3_image[] = {
   Invensense Functions
 *************************************************************************/
 
-void check_rc(int rc, const char *msg_context)
+int check_rc(int rc, const char *msg_context)
 {
   if (rc < 0)
   {
-    Serial.println("ICM20948 ERROR!");
-    while (1)
-      ;
+    DEBUG_PRINTLN("ICM20948 ERROR!");
+    return -1;
   }
+  return 0;
 }
 
 int load_dmp3(void)
 {
   int rc = 0;
-  Serial.println("Load DMP3 image");
+  DEBUG_PRINTLN("Load DMP3 image");
   rc = inv_icm20948_load(&icm_device, dmp3_image, sizeof(dmp3_image));
   return rc;
 }
@@ -167,8 +168,8 @@ int icm20948_sensor_setup(void)
   // Get whoami number
   rc = inv_icm20948_get_whoami(&icm_device, &whoami);
 
-  Serial.print("ICM20948 WHOAMI value=");
-  Serial.println(whoami);
+  DEBUG_PRINT("ICM20948 WHOAMI value=");
+  DEBUG_PRINTLN(whoami);
 
   // Check if WHOAMI value corresponds to any value from EXPECTED_WHOAMI array
   for (i = 0; i < sizeof(EXPECTED_WHOAMI) / sizeof(EXPECTED_WHOAMI[0]); ++i)
@@ -181,8 +182,8 @@ int icm20948_sensor_setup(void)
 
   if (i == sizeof(EXPECTED_WHOAMI) / sizeof(EXPECTED_WHOAMI[0]))
   {
-    Serial.print("Bad WHOAMI value=");
-    Serial.println(whoami);
+    DEBUG_PRINT("Bad WHOAMI value=");
+    DEBUG_PRINTLN(whoami);
     return rc;
   }
 
@@ -190,23 +191,23 @@ int icm20948_sensor_setup(void)
   inv_icm20948_init_matrix(&icm_device);
 
   // set default power mode
-  Serial.println("Putting Icm20948 in sleep mode...");
+  DEBUG_PRINTLN("Putting Icm20948 in sleep mode...");
   rc = inv_icm20948_initialize(&icm_device, dmp3_image, sizeof(dmp3_image));
   if (rc != 0)
   {
-    Serial.println("Initialization failed. Error loading DMP3...");
+    DEBUG_PRINTLN("Initialization failed. Error loading DMP3...");
     return rc;
   }
 
   // Configure and initialize the ICM20948 for normal use
-  Serial.println("Booting up icm20948...");
+  DEBUG_PRINTLN("Booting up icm20948...");
 
   // Initialize auxiliary sensors
   inv_icm20948_register_aux_compass(&icm_device, INV_ICM20948_COMPASS_ID_AK09916, AK0991x_DEFAULT_I2C_ADDR);
   rc = inv_icm20948_initialize_auxiliary(&icm_device);
   if (rc == -1)
   {
-    Serial.println("Compass not detected...");
+    DEBUG_PRINTLN("Compass not detected...");
   }
 
   icm20948_apply_mounting_matrix();
@@ -217,7 +218,7 @@ int icm20948_sensor_setup(void)
   inv_icm20948_init_structure(&icm_device);
 
   // we should be good to go !
-  Serial.println("We're good to go !");
+  DEBUG_PRINTLN("We're good to go !");
 
   return 0;
 }
@@ -428,7 +429,7 @@ TeensyICM20948::TeensyICM20948()
 {
 }
 
-void TeensyICM20948::init(TeensyICM20948Settings settings)
+int TeensyICM20948::init(TeensyICM20948Settings settings)
 {
   // Setup SPI
   chipSelectPin = settings.cs_pin;
@@ -467,7 +468,10 @@ void TeensyICM20948::init(TeensyICM20948Settings settings)
   // Now that Icm20948 device was initialized, we can proceed with DMP image loading
   // This step is mandatory as DMP image are not store in non volatile memory
   rc += load_dmp3();
-  check_rc(rc, "Error sensor_setup/DMP loading.");
+  if (check_rc(rc, "Error sensor_setup/DMP loading.") == -1) {
+      return -1;
+  }
+
 
   // Set mode
   inv_icm20948_set_lowpower_or_highperformance(&icm_device, settings.mode);
@@ -503,6 +507,7 @@ void TeensyICM20948::init(TeensyICM20948Settings settings)
     seal = seal | 0b00100000;
   }
   // initialSettings = settings; 
+  return 0;
 }
 
 void TeensyICM20948::task()

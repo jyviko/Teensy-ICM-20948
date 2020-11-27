@@ -35,7 +35,7 @@ class TeensyICM20948
 public:
   TeensyICM20948();
 
-  void init(TeensyICM20948Settings settings);
+  int init(TeensyICM20948Settings settings);
   void task();
 
   bool gyroDataIsReady();
